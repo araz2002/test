@@ -1,4 +1,4 @@
-# ## Ubuntu - setup OpenCV 4.1:
+#  Ubuntu - setup OpenCV 4.1:
 1. Download OpenCV, cd to opencv
 2. mkdir build
 3. cd build
@@ -8,7 +8,7 @@
 7. cmake ..
 8. make
 
-# ## Compile imageProcess
+# Compile imageProcess
 1. mkdir build
 2. cd build
 3. export OpenCV_DIR=...path_to.../opencv/build
