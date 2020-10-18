@@ -1,4 +1,5 @@
 #include <iostream>
+#include <memory>
 #include "image.h"
 
 
@@ -10,6 +11,15 @@ void Image::loadImage() {
     if ( srcImage.empty() ) {
         cout << "Could not open or find the image with path \n" << filePath << endl;
     }
+}
+
+string Image::imageName( string _filePath ) {
+    stringstream nameStream( _filePath ) ; 
+    string name ;
+    while( nameStream.good() ) {
+	getline( nameStream, name, '/') ; 
+    }
+    return name ;
 }
 
 void Image::loadGrayImage() {
@@ -40,42 +50,20 @@ int Image::resizeImageRows() {
     return rows2 ;
 }
 
-void Image::setScale( int _scale ) {
+void Image::calcNewColRow( float _scale ) {
     cols2 = (int) ( cols / _scale ) ;
     rows2 = (int) ( rows / _scale ) ;
 }
 
 void Image::doImageResize() {
-    resize( srcImage, resizeImage, Size( cols, rows2 ) ) ;
+    resize( srcImage, resizeImage, Size( cols2, rows2 ) ) ;
 
 }
 
-void Image::display( string _type ) {
-    if ( _type == "original" ) {
-	imshow("Original loaded image ", srcImage ) ;
-	waitKey( 2000 ) ;
-    } else if ( _type == "resized" ) {
-	imshow("Resized image ", resizeImage ) ;
-	waitKey( 2000 ) ;
-    } else if ( _type == "gray" ) {
-	imshow("Gray loaded image ", grayImage ) ;
-	waitKey( 2000 ) ;
-    } else if ( _type == "filtered" ) {
-	double alpha = 0.5; 
-	double beta = 0.5 ;
-	Mat combined ;
-	Mat combined2 ;
-	addWeighted( resizeImage, alpha, filteredImage, beta, 0.0, combined ) ;
-	hconcat( resizeImage, filteredImage, combined ) ;
-	resize(combined, combined2, Size(960, 540) ) ;
-	imshow("Gray loaded image ", combined2 ) ;
-	//imshow("Gray loaded image ", filteredImage ) ;
-	waitKey( 1000 ) ;
-    }
-}
 
-void Image::pass2DFilter() {
-/*
+void Image::doSegmentation( string resType ) {
+
+/* make background to black
     for ( int i = 0; i < srcImage.rows; i++ ) {
         for ( int j = 0; j < srcImage.cols; j++ ) {
             if ( srcImage.at<Vec3b>(i, j) == Vec3b(255,255,255) )
@@ -102,17 +90,25 @@ void Image::pass2DFilter() {
     //
     Mat sharp ;
     Mat imgLaplacian ;
+    Mat hsv_image ;
+
+    medianBlur( resizeImage, resizeImage, 3 ) ;
+    //cvtColor( srcImage, hsv_image, cv::COLOR_BGR2HSV);
+    cvtColor( resizeImage, filteredImage, cv::COLOR_BGR2HSV);
+
+    /*
+    inRange( hsv_image, cv::Scalar(0, 100, 100), cv::Scalar(10, 255, 255), filteredImage ) ;
 
     filter2D( srcImage, imgLaplacian, CV_32F, kernel ) ;
 
     srcImage.convertTo( sharp, CV_32F ) ;
 
-/*
     filter2D( resizeImage, imgLaplacian, CV_32F, kernel ) ;
 
     resizeImage.convertTo( sharp, CV_32F ) ;
-*/
+
     filteredImage = sharp - imgLaplacian ;
+    */
 
     // convert back to 8bits gray scale
     filteredImage.convertTo( filteredImage, CV_8UC3 ) ;
@@ -121,8 +117,8 @@ void Image::pass2DFilter() {
     // Create binary image from source image
     Mat bw;
     cvtColor( filteredImage, bw, COLOR_BGR2GRAY);
-    //threshold(bw, bw, 40, 255, THRESH_BINARY | THRESH_OTSU);
-    threshold(bw, bw, 4, 25, THRESH_BINARY | THRESH_OTSU);
+    threshold(bw, bw, 40, 255, THRESH_BINARY | THRESH_OTSU);
+//    threshold(bw, bw, 4, 25, THRESH_BINARY | THRESH_OTSU);
 
     Mat dist;
     // Perform the distance transform algorithm
@@ -130,39 +126,35 @@ void Image::pass2DFilter() {
     // Normalize the distance image for range = {0.0, 1.0}
     // so we can visualize and threshold it
     normalize(dist, dist, 0, 1.0, NORM_MINMAX);
-//    imshow("Distance Transform Image", dist);
     
     // Threshold to obtain the peaks
     // This will be the markers for the foreground objects
-    //threshold(dist, dist, 0.4, 1.0, THRESH_BINARY);
     threshold(dist, dist, 0.02, 1.0, THRESH_BINARY);
+
     // Dilate a bit the dist image
     Mat kernel1 = Mat::ones(3, 3, CV_8U);
     dilate(dist, dist, kernel1);
 
-    //imshow("Markers", dist);
-    //filteredImage = dist ;
-    //return ;
 
     // Create the CV_8U version of the distance image
     // It is needed for findContours()
     Mat dist_8u;
     dist.convertTo(dist_8u, CV_8U);
+
     // Find total markers
     vector<vector<Point> > contours;
     findContours(dist_8u, contours, RETR_EXTERNAL, CHAIN_APPROX_SIMPLE);
+
     // Create the marker image for the watershed algorithm
     Mat markers = Mat::zeros(dist.size(), CV_32S);
+
     // Draw the foreground markers
-    for (size_t i = 0; i < contours.size(); i++)
-    {
+    for ( size_t i = 0 ; i < contours.size() ; i++ ) {
         drawContours(markers, contours, static_cast<int>(i), Scalar(static_cast<int>(i)+1), -1);
     }
     // Draw the background marker
     circle(markers, Point(5,5), 3, Scalar(255), -1);
 
-    //imshow("Markers", markers*10000);
-    //return;
     // Perform the watershed algorithm
     watershed( filteredImage, markers ) ;
 
@@ -170,37 +162,35 @@ void Image::pass2DFilter() {
     Mat mark;
     markers.convertTo(mark, CV_8U);
     bitwise_not(mark, mark);
-    //    imshow("Markers_v2", mark); // uncomment this if you want to see how the mark
-    // image looks like at that point
-    // Generate random colors
     vector<Vec3b> colors;
     for (size_t i = 0; i < contours.size(); i++)
     {
-        int b = theRNG().uniform(0, 25);
-        int g = theRNG().uniform(0, 25);
+        int b = theRNG().uniform(0, 256);
+        int g = theRNG().uniform(0, 256);
         int r = theRNG().uniform(0, 256);
         colors.push_back(Vec3b((uchar)b, (uchar)g, (uchar)r));
     }
     // Create the result image
-    Mat dst = Mat::zeros(markers.size(), CV_8UC3);
-    imshow("Final Result", dst);
-    // Fill labeled objects with random colors
-    //filteredImage = dst ;
-    //return ;
+    Mat final = Mat::zeros(markers.size(), CV_8UC3);
     
-    for (int i = 0; i < markers.rows; i++)
-    {
-        for (int j = 0; j < markers.cols; j++)
-        {
+    for (int i = 0; i < markers.rows; i++) {
+        for (int j = 0; j < markers.cols; j++) {
             int index = markers.at<int>(i,j);
             if (index > 0 && index <= static_cast<int>(contours.size()))
-            {
-                dst.at<Vec3b>(i,j) = colors[index-1];
-            }
+                final.at<Vec3b>(i,j) = colors[index-1];
         }
     }
-    // Visualize the final image
-//    imshow("Final Result", dst);
-    filteredImage = dst ;
-    
+
+    if ( resType == "combined" ) {
+
+	combined = final ;
+
+	Mat combined2 ;
+	hconcat( resizeImage, final, combined2 ) ;
+	//resize( combined2, combined, Size(960, 540) ) ;
+	resize( combined2, combined, Size(1560, 940) ) ;
+
+    } else 
+
+	resize( final, combined, Size(960, 940) ) ;
 }

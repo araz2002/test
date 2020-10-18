@@ -8,36 +8,36 @@
 #include "opencv2/imgproc.hpp"
 #include "opencv2/video/background_segm.hpp"
 #include "opencv2/video/tracking.hpp"
-#include <iostream>
 
 using namespace cv;
 using namespace std;
 
 class Image {
-    //private:
+    private:
     public :
 	Mat srcImage ;
 	Mat grayImage ;
 	Mat resizeImage ;
 	Mat filteredImage ;
+	Mat combined ;
 	string filePath ;
-	int rows ;
-	int cols ;	
+	string fileName ;
 	int rows2 ;
 	int cols2 ;	
-    //public:
+	int rows ;
+	int cols ;	
 	void setImagePath( string _filePath ) ;
+	void calcNewColRow( float _scale ) ;
+	void setImageDim() ;
 	void loadImage() ; 
 	void loadGrayImage() ;
-	void setImageDim() ;
 	int imageCols() ;
 	int imageRows() ;
 	int resizeImageCols() ;
 	int resizeImageRows() ;
+	string imageName( string _filePath ) ;
 	void doImageResize() ;
-	void pass2DFilter() ;
-	void display( string _type ) ;
-	void setScale( int _scale ) ;
+	void doSegmentation( string resType ) ;
 } ;
 
 

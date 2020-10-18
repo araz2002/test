@@ -1,38 +1,90 @@
 #include <iostream>
+#include <bits/stdc++.h>
+#include <iostream>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <future>
+#include <mutex>
 #include "images.h"
 
+Images::Images( string _srcPath, const char* _dstPathC ) {
+    srcPath = _srcPath ;
+    dstPathC = _dstPathC ;
 
-namespace fs = std::filesystem ;
+    stringstream dstPathStream ;
+    dstPathStream << dstPathC ;
+    dstPathStream >> dstPath ;
+
+}
 
 void Images::loadAllImages() {
-    for ( const auto& file : fs::directory_iterator( dirPath ) ) {
-	std::cout << file.path() << std::endl;
-	filePaths.push_back( file.path() ) ;
+
+    for ( const auto& file : std::filesystem::directory_iterator( srcPath ) ) {
+	Image image ;
+	image.filePath = file.path() ;
+	image.fileName = imageName( image.filePath ) ;
+	allImages.push_back( image  ) ;
     }
+
+    mkdir( dstPathC, 0777 ) ;
+
 }
 
 void Images::getGrayFlag( bool flag ) {
     grayFlag = flag ;
 }
 
-void Images::getScale( int _scale ) {
+void Images::setScale( float _scale ) {
     scale = _scale ;
 }
 
-void Images::process( shared_ptr<Images> images, string _file, string displayType ) {
-    images->setImagePath( _file ) ;
-    images->loadImage() ;
-    images->loadGrayImage() ;
-    images->setImageDim() ;
-    cout << "Image dimention is " << images->imageRows() <<"X" <<images->imageCols() << endl ;
+void Images::setResultType( string _resultType ) {
+    resultType = _resultType ;
+}
 
-    images->setScale( images->scale ) ;
+void Images::process( Image&& image ) { 
 
-    cout << "Resize Image dimention is " << images->resizeImageRows() <<"X" <<images->resizeImageCols() << endl ;
+    image.loadImage() ;
+    image.setImageDim() ;
+//    images->loadGrayImage() ;
 
-    images->doImageResize() ;
-    images->pass2DFilter() ;
+    unique_lock<mutex> lck1( mtx ) ;
+        cout << endl << "Processing image: " << image.fileName << endl ;
+        cout << "Image  dimention: " << image.cols <<" X " << image.rows << endl ;
+    lck1.unlock() ;
+    
+    image.calcNewColRow( scale ) ;
 
-    images->display( displayType ) ;
+    image.doImageResize() ;
+
+    image.doSegmentation( resultType ) ;
+
+   
+    unique_lock<mutex> lck( mtx ) ;
+//    lock_guard<mutex> lck( mtx ) ;
+	string name = dstPath + "/" + image.fileName ;
+	finalImages.push_back( image.combined ) ;
+	finalPaths.push_back( name ) ;
+    lck.unlock() ;
+
+}
+
+void Images::displayImages( vector<Mat>&& finalImages ) {
+    
+    for ( Mat& img : finalImages ) {
+	imshow( " ", img ) ;
+	waitKey( 1500 ) ;
+    }
+
+}
+
+void Images::save( Mat finalImage, string dstPath ) {
+/*
+    double alpha = 0.5; 
+    double beta = 0.5 ;
+    addWeighted( resizeImage, alpha, filteredImage, beta, 0.0, combined ) ;
+*/
+    //    lock_guard<mutex> lck( mtx ) ;
+    imwrite( dstPath, finalImage ) ;
 }
 
