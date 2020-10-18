@@ -1,3 +1,4 @@
+# Concurrent image segmentation with OpenCV 
 ![alice-donovan-rouse-tMHAmxLyzvA-unsplash](https://user-images.githubusercontent.com/72900895/96362139-0eaefd80-10e0-11eb-9435-2f866cd6fa19.jpg)
 
 #  Ubuntu - setup OpenCV 4.1:
