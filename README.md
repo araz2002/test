@@ -48,8 +48,9 @@ To run sequencially with scale factor 1, the command will be:
   * Windows: recommend using [MinGW](http://www.mingw.org/)
   
 # Build instruction
+To compile the project, first OpenCV source needs to cloned and compiled. OpenCV has be linked with the project using cmake. Followings are the details of setting and compiling OpenCV and the project's source code: 
 
-## Setup OpenCV 4.1 in Ubuntu:
+### Setup OpenCV 4.1 in Ubuntu:
 1. Download OpenCV, cd to opencv
 2. mkdir build
 3. cd build
@@ -59,9 +60,24 @@ To run sequencially with scale factor 1, the command will be:
 7. cmake ..
 8. make
 
-## Compiling the project (imageProcess)
+### Compiling the project (imageProcess)
 1. mkdir build
 2. cd build
 3. export OpenCV_DIR=...path_to.../opencv/build
 4. cmake ..
 make
+
+# Rubric Points
+All four key requirments have been followed in this project
+
+### Loops, Functions, I/O
+The project code is clearly organized into functions. The project reads data from an external file or writes data to a file as part of the necessary operation of the program. The project accepts input from a user as part of the necessary operation of the program.
+
+### Object Oriented Programming
+The project accepts input from a user as part of the necessary operation of the program. All class data members are explicitly specified as public, protected, or private. Logical inheritance hierarchies are used to process images. 
+
+### Memory Management
+The project uses smart pointer: shared_ptr and does not use raw pointers. `move` sentiment is used to pass it to display method.
+
+### Concurrency
+The project uses multiple threads in the execution. A lock is used to protect segmented images vector that is shared across multiple threads in the project code.
