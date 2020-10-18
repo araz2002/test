@@ -14,23 +14,38 @@ In this project, a concurrent opject oriented program has been developed to cond
 # How to run and command line arguments
 The project's executable is called imageProcess and needs 5 arguments from command line:
  
-_path_to_input_directory_: Full or relative path to input image folder. Default value of "../inputImages" is set in `main.cpp`
+__path_to_input_directory__: Full or relative path to input image folder. Default value of "../inputImages" is set in `main.cpp`
 
-_path_to_output_directory_: Full or relative path to segmented output image folder. Default value of "../outputImages" is set in `main.cpp`
+__path_to_output_directory__: Full or relative path to segmented output image folder. Default value of "../outputImages" is set in `main.cpp`
 
-_result_type_: This is set either segmented output images to be saved and showed side by side (combined option) the original image or just the segmented images are only showed. Default value of "combined" is set in `main.cpp`. Only 2 options of "combined" or "segmented" will be processed.
+__result_type__: This is set either segmented output images to be saved and showed side by side (combined option) the original image or just the segmented images are only showed. Default value of "combined" is set in `main.cpp`. Only 2 options of "combined" or "segmented" will be processed.
 
-_scale_factor_: This is option to scale down the images before conduction segmentation. Default value is 1.0 and is getting set in `main.cpp`. A value of 1.0 of bigger will accepted.
+__scale_factor__: This is option to scale down the images before conduction segmentation. Default value is 1.0 and is getting set in `main.cpp`. A value of 1.0 of bigger will accepted.
  
-_if_concurrent_: This is to ask if the program to run concurrently or sequencially. Default value is "yes" in `main.cpp`. Only "yes" and "no" are acceptable.
+__if_concurrent__: This is to ask if the program to run concurrently or sequencially. Default value is "yes" in `main.cpp`. Only "yes" and "no" are acceptable.
  
 If no argument is provided from command line default values will be used. However, if one or more defaults need to be changed all five values need to be provided. Here is an example how to run the code concurrent with scale factor of 2:
 
-{`imageProcess "../inputImages" "../outputImages" combined 2 yes`}
+`imageProcess "../inputImages" "../outputImages" combined 2 yes`
  
 To run sequencially with scale factor 1, the command will be:
 
-imageProcess "../inputImages" "../outputImages" combined 1 no
+`imageProcess "../inputImages" "../outputImages" combined 1 no`
+
+# Dependencies
+
+* cmake >= 2.8
+  * All OSes: [click here for installation instructions](https://cmake.org/install/)  
+* make >= 4.1 (Linux, Mac), 3.81 (Windows)
+  * Linux: make is installed by default on most Linux distros
+  * Mac: [install Xcode command line tools to get make](https://developer.apple.com/xcode/features/)
+  * Windows: [Click here for installation instructions](http://gnuwin32.sourceforge.net/packages/make.htm)
+* OpenCV >= 4.1
+  * The OpenCV 4.1.0 source code can be found [here](https://github.com/opencv/opencv/tree/4.1.0)
+* gcc/g++ >= 5.4
+  * Linux: gcc / g++ is installed by default on most Linux distros
+  * Mac: same deal as make - [install Xcode command line tools](https://developer.apple.com/xcode/features/)
+  * Windows: recommend using [MinGW](http://www.mingw.org/)
   
 # Build instruction
 
