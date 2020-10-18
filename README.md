@@ -5,7 +5,7 @@
 In this project, a concurrent opject oriented program has been developed to conduct image segmentation for a given set of images using OpenCV. For compilation, cmake and make has been used to compile the source and also to link it with OpenCV. Source code contains two main classes, one class to process single image while that other inherences the other class public methods and attributes to process all images. For concurrency, std::async is used to create one task per image. In order to save images for writing to the dick or displaying, unique_lock is used to push_back new images to the vector of final images. Users can provide 5 command line arguments to set path to the input images, path to output images, type of output images for display, scaling factor for inlet images and flag to conduct concurrent or not. Speedup of 3 has been observed for running the code to process 26 images using a 4-core machine.
 
 # Project files
-image.h
+`image.h`
 image.cpp
 images.h
 images.cpp
